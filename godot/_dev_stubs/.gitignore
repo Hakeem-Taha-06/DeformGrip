@@ -1,0 +1,3 @@
+# Ignore generated local synthetic test fixtures and dev test outputs
+fixtures/
+test_out/

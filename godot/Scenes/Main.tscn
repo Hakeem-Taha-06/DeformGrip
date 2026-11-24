@@ -1,0 +1,41 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Scene/MainController.cs" id="1_main"]
+[ext_resource type="Script" path="res://Scripts/Scene/OrbitCameraController.cs" id="2_cam"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_bg"]
+sky_top_color = Color(0.14, 0.17, 0.22, 1)
+sky_horizon_color = Color(0.22, 0.25, 0.31, 1)
+ground_bottom_color = Color(0.10, 0.12, 0.15, 1)
+ground_horizon_color = Color(0.20, 0.22, 0.27, 1)
+
+[sub_resource type="Sky" id="Sky_bg"]
+sky_material = SubResource("ProceduralSkyMaterial_bg")
+
+[sub_resource type="Environment" id="Environment_studio"]
+background_mode = 2
+sky = SubResource("Sky_bg")
+ambient_light_source = 3
+ambient_light_energy = 0.55
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_studio")
+
+[node name="KeyLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.819152, -0.369644, 0.439385, 0, 0.766044, 0.642788, -0.573576, -0.526541, 0.627507, 0.15, 0.22, 0.18)
+light_energy = 1.25
+shadow_enabled = false
+
+[node name="FillLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866025, 0.25, -0.433013, 0, 0.866025, 0.5, 0.5, 0.433013, -0.75, -0.18, -0.12, -0.15)
+light_energy = 0.55
+shadow_enabled = false
+
+[node name="OrbitCamera" type="Camera3D" parent="."]
+fov = 38.0
+near = 0.005
+far = 10.0
+script = ExtResource("2_cam")
