@@ -1,12 +1,13 @@
 {
-  "_notes": "Owner: Role 4. CONTRACT 6.1 starting values kept unchanged at M0. Material values (E_inf=300k Pa, E1=200k Pa, tau1=0.5 s, nu=0.35, density=1000 kg/m^3) are chosen representative values, not fitted data. Targets rel_L2_max=0.05 and frame_ms_max=16.7 ms are our own project targets (expected actual rel_L2 around 1e-4 or lower). PENDING: small-strain rule (max surface displacement < ~10% of radius = 3.5 mm at 20 N) can only be checked with Role 2a's real results after M1; 20 N is the value at risk (fallbacks: drop 20 N from static.forces_N, or raise stiffness). Node rule checked: every cap has >= min_nodes nodes at every level (verified via surface.json: smallest cap has 15 / 38 / 91 nodes on coarse / medium / fine). Settings freeze after M1; a later change invalidates other roles' results and must be announced.",
+  "_notes": "Owner: Role 4. CONTRACT 6.1 starting values kept unchanged at M0. Material values (E_inf=300k Pa, E1=200k Pa, tau1=0.5 s, nu=0.35, density=1000 kg/m^3) are chosen representative values, not fitted data. Targets rel_L2_max=0.05 and frame_ms_max=16.7 ms are our own project targets (expected actual rel_L2 around 1e-4 or lower). Small-strain rule checked with Role 2a's solver (E0 = 500 kPa, fine mesh): at 20 N the axial caps stay below 7% of the radius, while cap_lower, cap_side, cap_oblique and cap_shear reach 24%, 29%, 34% and 68% (10% is reached near 8.4, 6.9, 5.8 and 2.9 N). Decision: all amplitudes are kept, points beyond the limit are flagged (validity key), and nonlinear_check_forces_N brackets the limit. Node rule checked: every cap has >= min_nodes nodes at every level (verified via surface.json: smallest cap has 15 / 38 / 91 nodes on coarse / medium / fine). Settings freeze after M1; a later change invalidates other roles' results and must be announced.",
   "geometry": {"radius_m": 0.035, "fixed_cap_deg": 30},
+  "validity": {"max_disp_fraction_of_radius": 0.10},
   "mesh_levels": {"coarse": 800, "medium": 3000, "fine": 10000},
   "material": {"nu": 0.35, "E_inf_Pa": 300000, "E1_Pa": 200000, "tau1_s": 0.5,
                "density_kg_m3": 1000},
   "timing": {"dt_force_s": 0.001, "dt_out_s": 0.01},
   "static": {"forces_N": [1, 2, 5, 10, 20],
-             "nonlinear_check_forces_N": [20, 50, 100],
+             "nonlinear_check_forces_N": [2, 5, 10, 20, 50, 100],
              "playback_table_forces_N": [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]},
   "cases": {
     "min_nodes": 5,

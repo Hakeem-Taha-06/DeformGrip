@@ -47,6 +47,7 @@ Rule: write only inside what you own. If you need a change in someone else's out
 - **Mesh:** linear tetrahedra (P1), topology never changes.
 - **Material:** homogeneous, isotropic, constant Poisson's ratio `nu`. Settings give `E_inf`, `E1`, `tau1`. Define `E0 = E_inf + E1`. **Stage 1 uses E = E0** (the instantaneous modulus), so Stage 2 reduces to Stage 1 at t = 0+.
 - **Constraints:** all `fixed_nodes` have u = 0 (all three components). A load applied to a fixed node produces no displacement.
+- **No body force:** gravity and other body forces are not modelled. Every implementation, including the SOFA scene, runs with gravity switched off.
 
 ### 4.2 Loads and cases
 - A **load** is a force vector (fx, fy, fz) in newtons applied to one surface row. A **load set** is any collection of loads on distinct rows.
@@ -72,7 +73,7 @@ Exact update for a force that is linear within a step `dt` (with `a = (E_inf/(E0
 Then `u(t) = G f_eff(t)`. State is kept per force component, and it continues to relax after a load is removed. This is valid because `nu` is constant and `G` is evaluated at E0 (correspondence principle). It is derived by superposition from a scalar form that was checked numerically (section 9); the Stage 2 tests (`solver/README.md`) check the vector form. Checks: `f_eff(0+) = f`; under constant force `f_eff -> f*E0/E_inf`.
 
 ### 4.6 Validity limits
-- Small strain: trusted only while the largest surface displacement stays below about 10% of the radius. Larger loads are used only in the optional nonlinear check (section 7).
+- Small strain: the linear model is intended for displacements below `validity.max_disp_fraction_of_radius` times the radius (0.10 in the settings). This is a rule of thumb, not a derived error bound. Test points beyond it stay in the test list and are flagged in every output that reports them; the nonlinear check samples amplitudes around the limit (section 7) to show where the departure begins.
 - Loads act on the reference surface positions; the contact is not updated as the surface moves.
 - No rigid-body motion: the ball is fixed at the -z cap.
 - The comparison validates our implementation against SOFA on the same linear problem. It does not validate the model against real rubber; the material values are chosen representative values, not fitted data.
@@ -109,12 +110,13 @@ Starting values; Role 4 finalizes them at M0 and freezes them after M1. Everyone
 {
   "_notes": "Owner: Role 4. Starting values. Finalize at M0, freeze after M1.",
   "geometry": {"radius_m": 0.035, "fixed_cap_deg": 30},
+  "validity": {"max_disp_fraction_of_radius": 0.10},
   "mesh_levels": {"coarse": 800, "medium": 3000, "fine": 10000},
   "material": {"nu": 0.35, "E_inf_Pa": 300000, "E1_Pa": 200000, "tau1_s": 0.5,
                "density_kg_m3": 1000},
   "timing": {"dt_force_s": 0.001, "dt_out_s": 0.01},
   "static": {"forces_N": [1, 2, 5, 10, 20],
-             "nonlinear_check_forces_N": [20, 50, 100],
+             "nonlinear_check_forces_N": [2, 5, 10, 20, 50, 100],
              "playback_table_forces_N": [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]},
   "cases": {
     "min_nodes": 5,
@@ -141,6 +143,7 @@ Starting values; Role 4 finalizes them at M0 and freezes them after M1. Everyone
 }
 ```
 - `mesh_levels` values are target node counts (accept +-30%). `fixed_cap_deg` is the polar half-angle from the -z pole.
+- `validity.max_disp_fraction_of_radius` is the largest displacement, as a fraction of `radius_m`, up to which the linear model is considered valid (section 4.6). Nobody hard-codes it. `nonlinear_check_forces_N` brackets the point where the most compliant physical cases (shear, oblique) reach it.
 - Case types: `cap` selects surface nodes whose direction `x/|x|` lies within `half_angle_deg` of the centre direction given by `polar_deg` (from +z) and `azimuth_deg` (from +x towards +y), and weights them by lumped surface area (`surface_areas`, normalized to sum 1). `direction` is `"inward_normal"` (per node `-x/|x|`) or a global 3-vector (normalized by the generator). `random` picks `n_nodes` distinct surface rows with a seeded generator and gives each a random 3D direction and a random positive weight, normalized to sum 1. Random cases are numerical tests of the arbitrary-load path (`"physical": false`): they are excluded from the small-strain rule, the physical figures and the playback files.
 - A profile is: linear ramp from 0 to `peak_N` over `ramp_s`, hold for `hold_s`, linear release to 0 over `release_s`, then `tail_s` seconds at zero.
 - `timing_cases` are the cases for which timing files are written: a typical case and the worst case in which every surface node is loaded.
@@ -193,8 +196,8 @@ Sources: `ours`, `sofa` (small-strain reference), `sofa_large` (optional corotat
 
 ## 7. Stages, required tests and metrics
 
-- **Stage 1 (mandatory):** static tests: every level x case x amplitude in `static.forces_N`, ours versus `sofa` (small-strain). Timing for every level and each `timing_cases` entry.
-- **Nonlinear check (optional):** `sofa_large` versus ours at `static.nonlinear_check_forces_N`, for physical cases, to show where the linear model stops being valid.
+- **Stage 1 (mandatory):** static tests: every level x case x amplitude in `static.forces_N`, ours versus `sofa` (small-strain). Points whose largest displacement exceeds the validity limit stay in the tests and are flagged (section 4.6). Timing for every level and each `timing_cases` entry.
+- **Nonlinear check (optional):** `sofa_large` versus ours at `static.nonlinear_check_forces_N`, for physical cases, so that the report shows where the linear model starts to depart from the corotational one, not only that it has.
 - **Stage 2 (only after the Stage 1 comparison table exists):** dynamic tests with both profiles for the levels and cases in `stage2`. See open item O1.
 - **Metrics** (Role 4 implements them; everyone may use them to self-check). With `u_ref` the SOFA small-strain result, over surface nodes:
   - `rel_L2 = ||u - u_ref||_2 / ||u_ref||_2` (flattened `(n_surface*3,)`).
@@ -220,12 +223,12 @@ Sources: `ours`, `sofa` (small-strain reference), `sofa_large` (optional corotat
 - scikit-fem's DOF layout was node-major interleaved (`nodal_dofs[:, i] == 3i..3i+2`) in that version. Assert it, do not assume it.
 - The scalar Stage 2 update matched an independent fine-step RK4 solution of the same ODE to about 1e-11.
 
-**Estimates, not measured:** surface node counts of about 250 / 650 / 1400 for coarse / medium / fine, which would make `G.bin` about 2 / 15 / 70 MB; building `G` needs `3*n_surface` back-substitutions per level.
+**Measured in one prototype run (single core, not a benchmark):** the committed meshes have `n_surface` = 456 / 1220 / 2977 for coarse / medium / fine, so `G.bin` is 7 / 54 / 319 MB in float32 (`36*n_surface^2` bytes). Building `G` needs one back-substitution per free surface DOF: about 0.5 / 3.4 / 26 ms per column, so roughly 1 / 12 / 213 s per level after a factorization of 0.06 / 0.7 / 12.5 s. Per-frame cost in the engine is not measured.
 
 ## 10. Open items
 
 - **O1 (Stage 2 reference):** it is not yet known whether the installed SOFA has a viscoelastic component that reproduces the standard linear solid. Fallback: Kelvin-Voigt via SOFA Rayleigh stiffness damping, mirrored in ours as a first-order lag (`beta*f_eff' + f_eff = f`, with `beta` equal to the Rayleigh stiffness coefficient). Roles 3 and 4 decide after M2 and record it in `stage2.model` (`"sls"` or `"kv"`). The submitted methodology names the Prony/standard-linear-solid form.
-- **O2:** the Gmsh script and the loading of the produced MSH 2.2 file in SOFA and in scikit-fem were **not executed** when this contract was written. The first integration test is: the same `ball.msh` loads in both, with identical node counts and total tet volume.
+- **O2:** the three `ball.msh` files load in scikit-fem: `solver/fem_core.py` checks that counts and every node coordinate equal the file as read by meshio and `surface.json`, and that the DOF layout is node-major. Loading the same files in SOFA is **not yet verified**; the remaining integration test is: the same `ball.msh` loads in SOFA with identical node counts and total tet volume.
 - **O3:** all numeric values in section 6.1 are starting points owned by Role 4. In particular the smallest cap may hold fewer than `min_nodes` nodes on the coarse mesh; Role 4 enlarges it in that case.
 - **O4:** SOFA component names and static-solver availability vary by SOFA version; verify them in the installed version instead of trusting names in this document. Whether `ConstantForceField` accepts arbitrary per-node 3D forces for all case types is expected but unverified.
 - **O5:** the Godot version, the coordinate map and triangle winding (section 3), and the mesh-update method are untested; 1b verifies and records them.

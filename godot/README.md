@@ -17,12 +17,13 @@ A Godot 4 **.NET (C#)** project in `godot/`, a main scene, `godot/VERSION.txt` (
 3. **Force input:** define `IForceInput` with a method that fills a buffer with the current load set (`NodalLoad` from the core) for a given time. Implement `CaseForceSource` (loads of one case file scaled by an amplitude from a slider, 0-20 N, or by a profile CSV replay). Do not write controller or sensor code; keep the interface open.
 4. **"Ours" mode:** load `G.bin` through the core (`InfluenceMatrix`). Each rendered frame, build the load set and call the core, then write the vertex positions once: `rest + gain * u`. If `stage2.enabled`, advance the core's viscoelastic state in steps of `dt_force` through all force samples since the last frame.
 5. **"SOFA" mode:** read the force-table playback file of the selected case from `results/sofa/playback/`; pick the frames around the current amplitude and interpolate linearly. Random cases have no playback; the toggle is disabled for them.
-6. **Side-by-side toggle:** two balls (left = ours, right = SOFA) driven by the same case and amplitude at the same time. Show on screen: case id, amplitude, time, largest displacement, and the visual gain (default x1, adjustable up to x50, always labelled).
+6. **Side-by-side toggle:** two balls (left = ours, right = SOFA) driven by the same case and amplitude at the same time. Show on screen: case id, amplitude, time, largest displacement, and the visual gain (default x1, adjustable up to x50, always labelled). When the largest displacement exceeds `validity.max_disp_fraction_of_radius` times the radius (from the settings), show a visible warning that the linear model is outside its validity range.
 7. **Dump command:** a command-line flag (for example `--dump <level> <case> <profile>`) that replays a profile in "ours" mode and writes `results/godot/dumps/ours_<level>_<case>_<profile>.bin` (CONTRACT 6.7), so 2b's parity script can check it.
 8. **Timing:** in an **exported build** (not the editor) with vsync off, replay `slow_squeeze` for each level and each case in `timing_cases` and write `results/godot/timing/<level>_<case>.json`. Record two measurements (CONTRACT 6.6): the core update only, and the whole frame, each with mean/p95/max and its own `what_is_timed`, plus the hardware and Godot version.
 
 ## Acceptance checks
 - At rest, the ball is not inside-out, not mirrored, round, and oriented with the polar axis vertical (verify the coordinate map and winding by looking at it; open item O5).
+- With `cap_shear` at 5 N or more the validity warning is visible; at 1 N it is not.
 - With a constant 10 N amplitude on `cap_medium` at the `medium` level, the largest displacement shown equals Python's value within 1e-4 relative (checked through 2b's parity script).
 - Switching between ours and SOFA does not change the camera, the case or the amplitude.
 - The scene runs without SOFA or Python installed, given the data files.
