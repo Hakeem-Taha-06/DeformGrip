@@ -1,7 +1,8 @@
 # Role 2a solver requirements.
-# Tested with: Python 3.12, scikit-fem 12.0.2, meshio 5.3.5, scipy 1.18.1, numpy 2.5.4.
+# Tested with: Python 3.12, scikit-fem 12.0.2, meshio 5.3.5, scipy 1.18.1, numpy 2.5.4, matplotlib 3.11.2.
 # Python 3.13 has not been tested.
 scikit-fem>=12.0.2
 meshio>=5.3.5
 numpy
 scipy
+matplotlib

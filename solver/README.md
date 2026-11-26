@@ -39,7 +39,13 @@
 - Static result files exist for every level x case x amplitude; shape `(n_surface, 3)`, float64, no NaN.
 - `python solver/run_static.py` from a clean checkout reproduces the results.
 - `python solver/run_static.py --levels fine --cases pressure_all --full-check` passes (slow; run it once).
+- `make_figures.py` and `volume_check.py` run from a clean checkout after `run_static.py`, and `volume_check.py` passes its self-tests.
 - Stage 2 only: the unit tests above pass.
+
+### Analysis scripts
+Both read only the result files and the settings, and write to `results/ours/analysis/` (small files; commit them).
+- `python solver/make_figures.py`: `fig1_peak_vs_force.png`, `fig2_validity_limits.png`, `fig3_mesh_convergence.png`, `fig4_displacement_maps.png`, and the tables `static_summary.csv`, `mesh_convergence.csv`, `validity_limits.csv`. Needs `results/ours/static/` from `run_static.py`. Options: `--level` (figures 1 and 2, default `fine`), `--map-level` and `--map-force` (figure 4, default `medium` and 10 N).
+- `python solver/volume_check.py`: applies the linear displacement field to the mesh and reports the volume ratio (displaced / rest) of every tetrahedron, for each physical case and for the forces in `static.forces_N` together with `static.nonlinear_check_forces_N` (above 20 N the linear model is extrapolated). Writes `volume_ratio.csv` and `fig5_volume_ratio.png`. The smallest ratio depends strongly on the mesh (`cap_shear` at 20 N: 0.696 / 0.525 / 0.297 on coarse / medium / fine), so the 1st percentile and the fraction of tetrahedra below 0.9 are reported too; a ratio <= 0 marks an inverted tetrahedron. It is a geometric indicator of the linear solution, not an error estimate. Built-in self-tests: a uniform dilation gives (1+e)^3, a reflection gives -1, and for a small amplitude ratio - 1 equals the finite-element divergence.
 
 ### Not your job
 Meshing (1a), SOFA (3), engine code, test values and cases (4).

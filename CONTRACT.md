@@ -22,7 +22,7 @@ Team constraints: 6 people, each with roughly 4-5 hours per week, and not everyo
 |---|---|---|---|---|
 | 1a Model | 1a | `model/` | meshes, `surface.json` | settings |
 | 1b Scene | 1b | `godot/`, `results/godot/` | Godot project, timing files, dumps | settings, cases, exports, SOFA playback, `core/` |
-| 2a Solver | 2a | `solver/` files `fem_core.py`, `cases.py`, `run_static.py`, `viscoelastic.py`, `run_dynamic.py`, `requirements.txt`; `results/ours/static/`, `results/ours/dynamic/` | "ours" results | settings, meshes, cases, profiles |
+| 2a Solver | 2a | `solver/` files `fem_core.py`, `cases.py`, `run_static.py`, `viscoelastic.py`, `run_dynamic.py`, `requirements.txt`; `results/ours/static/`, `results/ours/dynamic/`, `results/ours/analysis/` | "ours" results | settings, meshes, cases, profiles |
 | 2b Export + core | 2b | `solver/` files `export.py`, `benchmark.py`, `check_parity.py`; `solver/export/`; `core/`; `results/ours/timing/` | influence-matrix export, C# core, timing, parity | `fem_core.py`, settings, meshes, Godot dumps |
 | 3 SOFA | 3 | `sofa/`, `results/sofa/`, `results/sofa_large/` | SOFA results, playback files | settings, meshes, cases, profiles |
 | 4 Comparison | 4 | `config/`, `compare/` | settings, profiles, cases, tables, figures, results text | meshes, all `results/` |
@@ -92,7 +92,7 @@ DeformGrip/
   sofa/                  [3]    scene + run scripts               (+ sofa/README.md)
   godot/                 [1b]   Godot 4 .NET project              (+ godot/README.md)
   results/
-    ours/{static,dynamic,timing}/            [2a; 2b writes timing]
+    ours/{static,dynamic,timing,analysis}/            [2a; 2b writes timing]
     sofa/{static,dynamic,timing,playback}/   [3]
     sofa_large/static/                       [3]  (optional)
     godot/{timing,dumps}/                    [1b]
