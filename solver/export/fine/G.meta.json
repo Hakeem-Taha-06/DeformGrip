@@ -1,0 +1,11 @@
+{
+  "mesh_level": "fine",
+  "n_surface": 2977,
+  "units": "m per N",
+  "E0_Pa": 500000.0,
+  "nu": 0.35,
+  "E_inf_Pa": 300000.0,
+  "E1_Pa": 200000.0,
+  "tau1_s": 0.5,
+  "layout": "float32 LE, column-major, index = col*3*n_surface + row"
+}

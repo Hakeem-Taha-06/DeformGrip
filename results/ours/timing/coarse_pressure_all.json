@@ -1,0 +1,33 @@
+{
+  "hardware": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel (16 logical CPUs), Windows 11",
+  "software": "Python 3.14.0, scikit-fem 12.0.2, scipy 1.16.2, numpy 2.2.6",
+  "mesh_level": "coarse",
+  "case_id": "pressure_all",
+  "n_surface": 456,
+  "n_nonzero_load_components": 1368,
+  "precompute_s": 2.2625,
+  "export_bytes": 7485696,
+  "measurements": [
+    {
+      "what_is_timed": "Python/scikit-fem full solve from scratch (assemble K + slice free DOFs + splu factorize + solve)",
+      "n_samples": 3,
+      "ms_mean": 391.6361,
+      "ms_p95": 421.2834,
+      "ms_max": 421.3512
+    },
+    {
+      "what_is_timed": "Python/scipy cached back-substitution (Level.solve_loads with cached splu factorization)",
+      "n_samples": 100,
+      "ms_mean": 1.0541,
+      "ms_p95": 1.3859,
+      "ms_max": 1.5389
+    },
+    {
+      "what_is_timed": "NumPy precomputed G apply on 1368 nonzero load components (float32 column-major G[:, nz] @ f_nz)",
+      "n_samples": 200,
+      "ms_mean": 5.8052,
+      "ms_p95": 6.5406,
+      "ms_max": 7.2263
+    }
+  ]
+}
