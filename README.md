@@ -43,7 +43,7 @@ $$
 Under small-strain kinematics and isotropic Hooke's law, the linearized strain tensor $\boldsymbol{\varepsilon}$ and Cauchy stress tensor $\boldsymbol{\sigma}$ are:
 
 $$
-\boldsymbol{\varepsilon}(\mathbf{u}) = \frac{1}{2}\left(\nabla\mathbf{u} + (\nabla\mathbf{u})^T\right), \qquad \boldsymbol{\sigma}(\mathbf{u}) = 2\mu\,\boldsymbol{\varepsilon}(\mathbf{u}) + \lambda\,\operatorname{tr}(\boldsymbol{\varepsilon}(\mathbf{u}))\,\mathbf{I}
+\boldsymbol{\varepsilon}(\mathbf{u}) = \frac{1}{2}\left(\nabla\mathbf{u} + (\nabla\mathbf{u})^T\right), \qquad \boldsymbol{\sigma}(\mathbf{u}) = 2\mu\,\boldsymbol{\varepsilon}(\mathbf{u}) + \lambda\,\mathrm{tr}(\boldsymbol{\varepsilon}(\mathbf{u}))\,\mathbf{I}
 $$
 
 where the first and second **Lamé parameters** $(\lambda, \mu)$ are determined from the instantaneous Young's modulus $E_0 = E_\infty + E_1$ and Poisson's ratio $\nu$:
@@ -58,7 +58,7 @@ $$
 |---|---|---|
 | $\mathbf{u}(\mathbf{x}) \in \mathbb{R}^3$ | Unknown field $[\text{m}]$ | 3D displacement vector at material point $\mathbf{x} \in \Omega$ |
 | $\boldsymbol{\varepsilon}(\mathbf{u})$ | $\frac{1}{2}(\nabla\mathbf{u} + (\nabla\mathbf{u})^T)$ | Linearized Cauchy small-strain tensor (dimensionless) |
-| $\boldsymbol{\sigma}(\mathbf{u})$ | $2\mu\,\boldsymbol{\varepsilon} + \lambda\,\operatorname{tr}(\boldsymbol{\varepsilon})\,\mathbf{I}$ $[\text{Pa}]$ | Cauchy stress tensor |
+| $\boldsymbol{\sigma}(\mathbf{u})$ | $2\mu\,\boldsymbol{\varepsilon} + \lambda\,\mathrm{tr}(\boldsymbol{\varepsilon})\,\mathbf{I}$ $[\text{Pa}]$ | Cauchy stress tensor |
 | $E_0$ | $E_\infty + E_1 = 300\text{ kPa} + 200\text{ kPa} = 500\text{ kPa}$ | Instantaneous Young's modulus (representative value, not fitted rubber data) |
 | $\nu$ | $0.35$ | Poisson's ratio (governs lateral expansion / compressibility) |
 | $\lambda$ | $432.10\text{ kPa}$ | First Lamé parameter (volumetric stiffness contribution) |
