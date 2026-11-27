@@ -1,0 +1,26 @@
+{
+  "hardware": "12th Gen Intel(R) Core(TM) i5-12450HX (12 logical CPUs); GPU: NVIDIA GeForce RTX 3050 6GB Laptop GPU; OS: Windows 10.0.26200",
+  "software": "Godot v4.7.2.stable.mono.official [ed1daf0bf] (.NET 8, GL Compatibility, Windows X64, exported build, VSync off, real core)",
+  "mesh_level": "medium",
+  "case_id": "pressure_all",
+  "profile": "slow_squeeze",
+  "target_frame_ms_max": 16.7,
+  "meets_frame_target_mean": true,
+  "meets_frame_target_p95": true,
+  "measurements": [
+    {
+      "what_is_timed": "Godot C# core update only (load-set build + InfluenceMatrix.Apply; slow_squeeze replay, 60-frame warmup excluded)",
+      "n_samples": 2056,
+      "ms_mean": 3.035,
+      "ms_p95": 8.976,
+      "ms_max": 18.5847
+    },
+    {
+      "what_is_timed": "Godot whole frame wall-clock interval (core update + normal recompute + GPU VBO upload + GL Compatibility render, VSync off; slow_squeeze replay, 60-frame warmup excluded)",
+      "n_samples": 2056,
+      "ms_mean": 3.8914,
+      "ms_p95": 10.1329,
+      "ms_max": 20.5493
+    }
+  ]
+}
