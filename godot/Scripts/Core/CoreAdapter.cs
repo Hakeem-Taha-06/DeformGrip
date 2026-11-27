@@ -118,12 +118,13 @@ namespace DeformGrip.App.Core
     }
 #else
     /// <summary>
-    /// Adapter for Role 2b's real ../core/ library.
-    /// Update method calls here once Role 2b pushes core/*.csproj.
+    /// Adapter for Role 2b's core library (core/DeformGrip.Core.csproj).
     /// </summary>
     internal sealed class RealDeformCore : IDeformCore
     {
         private readonly InfluenceMatrix _matrix;
+        private readonly ViscoelasticState _visco;
+        private readonly NodalLoad[] _effLoadBuffer;
 
         public int NSurface { get; }
         public bool Stage2Enabled { get; }
@@ -141,21 +142,36 @@ namespace DeformGrip.App.Core
             NSurface = nSurface;
             Stage2Enabled = stage2Enabled;
             _matrix = InfluenceMatrix.Load(gBinPath, nSurface);
+            _visco = new ViscoelasticState(nSurface, eInfPa, e1Pa, tau1S, stage2Model, elasticMode: !stage2Enabled);
+            _effLoadBuffer = new NodalLoad[nSurface];
         }
 
         public void ApplyPhysical(ReadOnlySpan<NodalLoad> loads, float[] outDisp)
         {
-            // Pass gain = 1.0f so outDisp stays strictly in SI metres (CONTRACT §3).
+            // Pass gain = 1.0f so outDisp stays strictly in SI metres (CONTRACT section 3).
             _matrix.Apply(loads, 1.0f, outDisp);
         }
 
         public void StepViscoelastic(ReadOnlySpan<double> fPrev, ReadOnlySpan<double> fNext, double dt, float[] outDisp)
         {
-            throw new NotSupportedException("Wire Role 2b's Stage 2 viscoelastic class here when stage2.enabled is true.");
+            ReadOnlySpan<double> fEff = _visco.Step(fPrev, fNext, dt);
+            int count = 0;
+            for (int row = 0; row < NSurface; row++)
+            {
+                double fx = fEff[3 * row];
+                double fy = fEff[3 * row + 1];
+                double fz = fEff[3 * row + 2];
+                if (fx != 0.0 || fy != 0.0 || fz != 0.0)
+                {
+                    _effLoadBuffer[count++] = new NodalLoad(row, fx, fy, fz);
+                }
+            }
+            _matrix.Apply(_effLoadBuffer.AsSpan(0, count), 1.0f, outDisp);
         }
 
         public void ResetState()
         {
+            _visco.Reset();
         }
     }
 #endif

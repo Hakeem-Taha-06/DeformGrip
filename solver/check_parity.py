@@ -249,6 +249,11 @@ def main() -> int:
     args = ap.parse_args()
 
     settings = load_settings()
+    missing = [lvl for lvl in settings["mesh_levels"] if not (args.export_dir / lvl / "G.bin").exists()]
+    if missing:
+        print(f"FAIL: G.bin not found for level(s) {', '.join(missing)} in {args.export_dir}\n"
+              "      run `python solver/export.py` first (G.bin files are not committed to git)")
+        return 1
     dotnet_exe = _find_dotnet(args.dotnet)
 
     cs_ok = check_csharp_core(dotnet_exe, settings, args.export_dir, args.static_dir)

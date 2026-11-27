@@ -72,7 +72,7 @@ namespace DeformGrip.App.Cli
             {
                 GD.PushWarning(
                     "[BenchmarkRunner] Running inside the Godot editor. Final timing files for the report " +
-                    "MUST be generated from an exported Linux release build (not the editor) with VSync off.");
+                    "MUST be generated from an exported release build (not the editor) with VSync off.");
             }
 
             List<string> levels = levelsOverride != null && levelsOverride.Any()
@@ -222,7 +222,7 @@ namespace DeformGrip.App.Cli
             var report = new TimingReport
             {
                 Hardware = DetectHardwareSummary(),
-                Software = $"Godot {_paths.ReadPinnedVersion()} (.NET 8, GL Compatibility, Linux x86_64, {buildMode}, VSync off, {coreKind})",
+                Software = $"Godot {_paths.ReadPinnedVersion()} (.NET 8, GL Compatibility, {OS.GetName()} {System.Runtime.InteropServices.RuntimeInformation.OSArchitecture}, {buildMode}, VSync off, {coreKind})",
                 MeshLevel = _currentLevel,
                 CaseId = _currentCaseId,
                 Profile = _profile.ProfileId,

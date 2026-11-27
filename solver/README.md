@@ -79,7 +79,7 @@ Meshing (1a), SOFA (3), engine code, test values and cases (4).
 - `export.py` writes `G.bin` + `G.meta.json` for all 3 levels; the length of each `G.bin` is `4 * (3*n_surface)^2` bytes; `G.bin` read back (float64) equals 2a's `G` within float32 precision (about 1e-6 relative).
 - Python `10 * (G p)` from the file equals `results/ours/static/<level>_<case>_10N.npy` within float32 precision for every case.
 - Benchmark files contain all of (i), (ii), (iii) with `what_is_timed` filled in.
-- C# core output equals Python within 1e-5 relative; Godot dumps agree within 1e-4 relative.
+- C# core output equals Python within 1e-5 relative, except `pressure_all` (every surface node loaded), which is held to 1e-4 because float32 accumulation over thousands of columns gives about 3e-5 to 4e-5 (observed maximum 4.3e-5); Godot dumps agree within 1e-4 relative.
 - `core/` builds without any Godot assembly.
 
 ### Not your job

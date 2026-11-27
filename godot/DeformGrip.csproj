@@ -7,12 +7,10 @@
     <LangVersion>latest</LangVersion>
 
     <!--
-      Toggle this to false once Role 2b delivers core/*.csproj:
-        1. Set <UseCoreStub>false</UseCoreStub>
-        2. Update the ProjectReference below to Role 2b's exact .csproj filename
-        3. Adjust RealDeformCore in Scripts/Core/CoreAdapter.cs if namespace/method signatures differ
+      false: build against Role 2b's real core library (core/DeformGrip.Core.csproj).
+      true:  build against the throw-away stub in _dev_stubs/ (no G.bin needed; development only).
     -->
-    <UseCoreStub>true</UseCoreStub>
+    <UseCoreStub>false</UseCoreStub>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseCoreStub)' == 'true'">
@@ -20,10 +18,8 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(UseCoreStub)' != 'true'">
-    <!-- Exclude dev stub code when building against Role 2b's real core library -->
+    <!-- Real core: exclude the dev stub and reference the core library -->
     <Compile Remove="_dev_stubs\**\*.cs" />
-    <!-- Example reference once Role 2b commits core/*.csproj:
     <ProjectReference Include="..\core\DeformGrip.Core.csproj" />
-    -->
   </ItemGroup>
 </Project>

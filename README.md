@@ -44,6 +44,23 @@ compare/               [Role 4]   comparison, figures, report text  -> compare/R
 | 1b | `results/godot/timing/*`, `results/godot/dumps/*` | 2b (parity), 4 |
 | 4 | `compare/out/*` | report |
 
+## Final test run (everything except SOFA)
+
+Requirements: Python with `pip install -r solver/requirements.txt`, the .NET 8 SDK, and the Godot version pinned in `godot/VERSION.txt` (.NET edition). `godot/DeformGrip.csproj` builds against the real core (`UseCoreStub` is false).
+
+1. **Influence matrices** (not in git, 7 / 51 / 304 MiB; the fine level takes several minutes): `python solver/export.py`
+2. **C# core against Python:** `python solver/check_parity.py` (part 1; it stops with a clear message if a `G.bin` is missing).
+3. **Godot dumps** (run from the repository root; `godot` is your Godot .NET executable):
+   ```
+   godot --headless --path godot -- --dump coarse cap_medium slow_squeeze
+   godot --headless --path godot -- --dump medium cap_medium slow_squeeze
+   godot --headless --path godot -- --dump fine cap_shear rapid_press
+   godot --headless --path godot -- --dump medium pressure_all slow_squeeze
+   ```
+   Each writes `results/godot/dumps/ours_<level>_<case>_<profile>.bin` (4 to 29 MB; commit only a few). Then run `python solver/check_parity.py` again; part 2 compares the dumps with Python.
+4. **Look at the scene** in the Godot editor (F5): the ball must not be inside-out or mirrored, and its polar axis must be vertical. Try a case and an amplitude, and check the validity warning with `cap_shear` at 5 N or more.
+5. **Timing** needs an exported build with VSync off (the editor is allowed but is labelled "editor"). In Godot: Project > Export, choose "Windows Desktop" or "Linux x86_64" (export templates for your Godot version must be installed), export a release build to `godot/build/`, then run the executable with `-- --benchmark` (on Windows use the `.console.exe` to see the output). It writes `results/godot/timing/<level>_<case>.json` for each timing case.
+
 ## Working rules
 
 - Write only inside what you own (CONTRACT 2). To request a change in someone else's output, ask the user to relay it.
